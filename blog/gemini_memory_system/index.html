@@ -1,0 +1,175 @@
+<!DOCTYPE html>---
+<head><!-- Global Metadata --><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="Shouran Mu's Blog" href="https://shrmu.github.io/rss.xml"><meta name="generator" content="Astro v5.12.9"><!-- Font preloads --><link rel="preload" href="/fonts/atkinson-regular.woff" as="font" type="font/woff" crossorigin><link rel="preload" href="/fonts/atkinson-bold.woff" as="font" type="font/woff" crossorigin><!-- Canonical URL --><link rel="canonical" href="https://shrmu.github.io/blog/gemini_memory_system/"><!-- Primary Meta Tags --><title>Gemini CLI Memory System</title><meta name="title" content="Gemini CLI Memory System"><meta name="description" content="A deep dive into the layered memory system of the Gemini CLI agent."><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://shrmu.github.io/blog/gemini_memory_system/"><meta property="og:title" content="Gemini CLI Memory System"><meta property="og:description" content="A deep dive into the layered memory system of the Gemini CLI agent."><meta property="og:image" content="https://shrmu.github.io/_astro/blog-placeholder-1.Bx0Zcyzv.jpg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://shrmu.github.io/blog/gemini_memory_system/"><meta property="twitter:title" content="Gemini CLI Memory System"><meta property="twitter:description" content="A deep dive into the layered memory system of the Gemini CLI agent."><meta property="twitter:image" content="https://shrmu.github.io/_astro/blog-placeholder-1.Bx0Zcyzv.jpg"><style>:root{--accent: #2337ff;--accent-dark: #000d8a;--black: 15, 18, 25;--gray: 96, 115, 159;--gray-light: 229, 233, 240;--gray-dark: 34, 41, 57;--gray-gradient: rgba(var(--gray-light), 50%), #fff;--box-shadow: 0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%), 0 16px 32px rgba(var(--gray), 33%)}@font-face{font-family:Atkinson;src:url(/fonts/atkinson-regular.woff) format("woff");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:Atkinson;src:url(/fonts/atkinson-bold.woff) format("woff");font-weight:700;font-style:normal;font-display:swap}body{font-family:Atkinson,sans-serif;margin:0;padding:0;text-align:left;background:linear-gradient(var(--gray-gradient)) no-repeat;background-size:100% 600px;word-wrap:break-word;overflow-wrap:break-word;color:rgb(var(--gray-dark));font-size:20px;line-height:1.7}main{width:720px;max-width:calc(100% - 2em);margin:auto;padding:3em 1em}h1,h2,h3,h4,h5,h6{margin:0 0 .5rem;color:rgb(var(--black));line-height:1.2}h1{font-size:3.052em}h2{font-size:2.441em}h3{font-size:1.953em}h4{font-size:1.563em}h5{font-size:1.25em}strong,b{font-weight:700}a,a:hover{color:var(--accent)}p{margin-bottom:1em}.prose p{margin-bottom:2em}textarea{width:100%;font-size:16px}input{font-size:16px}table{width:100%}img{max-width:100%;height:auto;border-radius:8px}code{padding:2px 5px;background-color:rgb(var(--gray-light));border-radius:2px}pre{padding:1.5em;border-radius:8px}pre>code{all:unset}blockquote{border-left:4px solid var(--accent);padding:0 0 0 20px;margin:0;font-size:1.333em}hr{border:none;border-top:1px solid rgb(var(--gray-light))}@media (max-width: 720px){body{font-size:18px}main{padding:1em}}.sr-only{border:0;padding:0;margin:0;position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px 1px 1px 1px);clip:rect(1px,1px,1px,1px);clip-path:inset(50%);white-space:nowrap}footer[data-astro-cid-sz7xmlte]{padding:2em 1em 6em;background:linear-gradient(var(--gray-gradient)) no-repeat;color:rgb(var(--gray));text-align:center}.social-links[data-astro-cid-sz7xmlte]{display:flex;justify-content:center;gap:1em;margin-top:1em}.social-links[data-astro-cid-sz7xmlte] a[data-astro-cid-sz7xmlte]{text-decoration:none;color:rgb(var(--gray))}.social-links[data-astro-cid-sz7xmlte] a[data-astro-cid-sz7xmlte]:hover{color:rgb(var(--gray-dark))}a[data-astro-cid-eimmu3lg]{display:inline-block;text-decoration:none}a[data-astro-cid-eimmu3lg].active{font-weight:bolder;text-decoration:underline}header[data-astro-cid-3ef6ksr2]{margin:0;padding:0 1em;background:#fff;box-shadow:0 2px 8px rgba(var(--black),5%)}h2[data-astro-cid-3ef6ksr2]{margin:0;font-size:1em}h2[data-astro-cid-3ef6ksr2] a[data-astro-cid-3ef6ksr2],h2[data-astro-cid-3ef6ksr2] a[data-astro-cid-3ef6ksr2].active{text-decoration:none}nav[data-astro-cid-3ef6ksr2]{display:flex;align-items:center;justify-content:space-between}nav[data-astro-cid-3ef6ksr2] a[data-astro-cid-3ef6ksr2]{padding:1em .5em;color:var(--black);border-bottom:4px solid transparent;text-decoration:none}nav[data-astro-cid-3ef6ksr2] a[data-astro-cid-3ef6ksr2].active{text-decoration:none;border-bottom-color:var(--accent)}.social-links[data-astro-cid-3ef6ksr2],.social-links[data-astro-cid-3ef6ksr2] a[data-astro-cid-3ef6ksr2]{display:flex}@media (max-width: 720px){.social-links[data-astro-cid-3ef6ksr2]{display:none}}
+main[data-astro-cid-bvzihdzo]{width:calc(100% - 2em);max-width:100%;margin:0}.hero-image[data-astro-cid-bvzihdzo]{width:100%}.hero-image[data-astro-cid-bvzihdzo] img[data-astro-cid-bvzihdzo]{display:block;margin:0 auto;border-radius:12px;box-shadow:var(--box-shadow)}.prose[data-astro-cid-bvzihdzo]{width:720px;max-width:calc(100% - 2em);margin:auto;padding:1em;color:rgb(var(--gray-dark))}.title[data-astro-cid-bvzihdzo]{margin-bottom:1em;padding:1em 0;text-align:center;line-height:1}.title[data-astro-cid-bvzihdzo] h1[data-astro-cid-bvzihdzo]{margin:0 0 .5em}.date[data-astro-cid-bvzihdzo]{margin-bottom:.5em;color:rgb(var(--gray))}.last-updated-on[data-astro-cid-bvzihdzo]{font-style:italic}
+</style></head> <body data-astro-cid-bvzihdzo> <header data-astro-cid-3ef6ksr2> <nav data-astro-cid-3ef6ksr2> <h2 data-astro-cid-3ef6ksr2><a href="/" data-astro-cid-3ef6ksr2>Shouran Mu&#39;s Blog</a></h2> <div class="internal-links" data-astro-cid-3ef6ksr2> <a href="/" data-astro-cid-3ef6ksr2="true" data-astro-cid-eimmu3lg> Home </a>  <a href="/blog" class="active" data-astro-cid-3ef6ksr2="true" data-astro-cid-eimmu3lg> Blog </a>  <a href="/about" data-astro-cid-3ef6ksr2="true" data-astro-cid-eimmu3lg> About </a>  </div> <div class="social-links" data-astro-cid-3ef6ksr2> <a href="https://github.com/SHRMu" target="_blank" data-astro-cid-3ef6ksr2> <span class="sr-only" data-astro-cid-3ef6ksr2>Go to my GitHub repo</span> <svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32" data-astro-cid-3ef6ksr2><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" data-astro-cid-3ef6ksr2></path></svg> </a> </div> </nav> </header>  <main data-astro-cid-bvzihdzo> <article data-astro-cid-bvzihdzo> <div class="hero-image" data-astro-cid-bvzihdzo>  </div> <div class="prose" data-astro-cid-bvzihdzo> <div class="title" data-astro-cid-bvzihdzo> <div class="date" data-astro-cid-bvzihdzo> <time datetime="2025-08-11T00:00:00.000Z"> Aug 11, 2025 </time>  </div> <h1 data-astro-cid-bvzihdzo>Gemini CLI Memory System</h1> <hr data-astro-cid-bvzihdzo> </div>  <h1 id="gemini-cli-memory-system">Gemini CLI Memory System</h1>
+<p>This document describes the layered memory system used by the Gemini CLI agent, allowing it to handle different types of information effectively, from immediate conversational context to long-term project rules.</p>
+<h2 id="1-short-term-conversational-memory">1. Short-Term Conversational Memory</h2>
+<p>This is the most basic layer. It’s the history of our current conversation.</p>
+<ul>
+<li><strong>What it is:</strong> The transcript of the messages we’ve exchanged in this session.</li>
+<li><strong>Purpose:</strong> It allows the agent to understand the immediate context, follow a train of thought, and refer to things just discussed (e.g., if you say “what about that file?”, it knows which file you mean).</li>
+<li><strong>Persistence:</strong> It’s temporary and is reset when a new session starts.</li>
+</ul>
+<h2 id="2-long-term-persistent-memory">2. Long-Term Persistent Memory</h2>
+<p>This is for information that needs to last across sessions. It’s primarily managed through files and a dedicated tool.</p>
+<ul>
+<li>
+<p><strong>A. Global <code>GEMINI.md</code> (User-level Rules):</strong></p>
+<ul>
+<li><strong>Location:</strong> A central configuration directory on the user’s system (e.g., <code>C:\Users\username\.gemini\GEMINI.md</code>).</li>
+<li><strong>Purpose:</strong> To store global preferences and general rules that the agent should follow for <strong>all</strong> projects. For example, “Always open files in my editor before changing them.”</li>
+<li><strong>How it’s updated:</strong> The user and the agent can edit this file to establish a baseline behavior.</li>
+</ul>
+</li>
+<li>
+<p><strong>B. Project <code>GEMINI.md</code> (Project-level Rules):</strong></p>
+<ul>
+<li><strong>Location:</strong> The root directory of the project being worked on.</li>
+<li><strong>Purpose:</strong> To store rules, architecture details, and conventions specific <strong>only to that project</strong>. This is where things like “All diagrams must use React Flow” or “This project uses <code>pnpm</code> for package management” are defined.</li>
+<li><strong>Hierarchy:</strong> If a rule in the project <code>GEMINI.md</code> conflicts with a rule in the global one, the <strong>project-specific rule always wins</strong>.</li>
+</ul>
+</li>
+<li>
+<p><strong>C. Saved Facts (<code>save_memory</code> tool):</strong></p>
+<ul>
+<li><strong>Concept:</strong> This is a “soft” or “lightweight” method for achieving persistence. The user doesn’t need to edit a file; they can simply ask the agent to remember a piece of information. The agent then uses this tool to store the fact persistently, and it’s automatically loaded in future sessions.</li>
+<li><strong>Why it’s needed:</strong>
+<ul>
+<li><strong>Convenience:</strong> It’s much faster and more conversational to say “Remember my API key is XYZ” than to manually open a <code>GEMINI.md</code> file to record it.</li>
+<li><strong>Scope:</strong> It is designed for small, atomic, and context-independent facts. It is not suitable for complex, structured information like project architecture or multi-step procedures.</li>
+<li><strong>Separation of Concerns:</strong> It keeps the formal project documentation (<code>GEMINI.md</code>) clean and focused on high-level rules and architecture, while small, ad-hoc personal facts are stored separately.</li>
+</ul>
+</li>
+<li><strong>Persistence Mechanism:</strong> When this tool is used, the information is saved locally in a persistent manner. The agent does not manage the file directly; the host environment that runs the agent handles the storage and retrieval. When a new session starts, the environment automatically loads these saved facts back into the agent’s memory.</li>
+<li><strong>Example:</strong> A user might say, “Remember that my preferred branch naming convention is <code>feature/ticket-123</code>.” The agent would then use the <code>save_memory</code> tool to store that fact.</li>
+</ul>
+</li>
+</ul>
+<h2 id="3-working-memory-active-context-gathering">3. “Working Memory” (Active Context Gathering)</h2>
+<p>This isn’t a file; it’s the process the agent uses to understand the current state of a project for a specific task.</p>
+<ul>
+<li><strong>What it is:</strong> A temporary, in-session understanding of the codebase that the agent builds on the fly.</li>
+<li><strong>How it works:</strong> When given a task (e.g., “Refactor this component”), the agent uses its tools (<code>read_file</code>, <code>glob</code>, <code>search_file_content</code>) to read the relevant files, check for existing conventions, find dependencies, and analyze the code.</li>
+<li><strong>Purpose:</strong> This is the most critical part of the software engineering workflow. It ensures that the agent doesn’t make blind assumptions and that its changes align with the project’s actual structure and style. This “memory” is dynamic and is constantly being updated as the agent works on a task.</li>
+</ul>
+<h3 id="clarification-conversational-vs-working-memory">Clarification: Conversational vs. Working Memory</h3>
+<p>The distinction between Short-Term Conversational Memory and Working Memory is crucial.</p>
+<ul>
+<li><strong>Conversational Memory is the <em>Instructions</em></strong>: It’s the chat history. It’s you telling the agent <em>what</em> to do.</li>
+<li><strong>Working Memory is the <em>Investigation</em></strong>: It’s the information the agent gathers using its tools (reading files, running commands) to figure out <em>how</em> to do it.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="left">Aspect</th><th align="left">Short-Term Conversational Memory</th><th align="left">”Working Memory” (Active Context)</th></tr></thead><tbody><tr><td align="left"><strong>Content</strong></td><td align="left">The history of our chat messages</td><td align="left">File contents, command outputs, search results</td></tr><tr><td align="left"><strong>Source</strong></td><td align="left">Our direct conversation</td><td align="left">The agent’s tools (<code>read_file</code>, <code>run_shell_command</code>)</td></tr><tr><td align="left"><strong>Purpose</strong></td><td align="left">To understand the user’s requests</td><td align="left">To understand the codebase and execute the task</td></tr></tbody></table>
+<h3 id="summary-table">Summary Table</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Memory Type</th><th>What it Stores</th><th>How it’s Loaded/Updated</th><th>Persistence</th></tr></thead><tbody><tr><td><strong>Conversational Memory</strong></td><td>Current chat history</td><td>Automatically, as we talk</td><td>Session-only</td></tr><tr><td><strong>Global <code>GEMINI.md</code></strong></td><td>User’s universal rules and preferences</td><td>By editing the file in the user’s config directory</td><td>Permanent (Global)</td></tr><tr><td><strong>Project <code>GEMINI.md</code></strong></td><td>Project-specific rules and architecture</td><td>By editing the file in the project root</td><td>Permanent (Project)</td></tr><tr><td><strong>Saved Facts</strong></td><td>Small, explicit facts the user asks to remember</td><td>Via the <code>save_memory</code> tool</td><td>Permanent (Global)</td></tr><tr><td><strong>Working Memory</strong></td><td>On-the-fly analysis of the code for a specific task</td><td>Via tools like <code>read_file</code>, <code>glob</code>, <code>run_shell_command</code></td><td>Task-specific</td></tr></tbody></table>
+<hr>
+<h3 id="摘要表-中文版">摘要表 (中文版)</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>内存类型</th><th>存储内容</th><th>加载/更新方式</th><th>持久性</th></tr></thead><tbody><tr><td><strong>对话内存</strong></td><td>当前的聊天记录</td><td>在我们交谈时自动记录</td><td>仅限当前会话</td></tr><tr><td><strong>全局 <code>GEMINI.md</code></strong></td><td>用户的通用规则和偏好</td><td>通过编辑用户配置目录中的文件</td><td>永久（全局）</td></tr><tr><td><strong>项目 <code>GEMINI.md</code></strong></td><td>项目特定的规则和架构</td><td>通过编辑项目根目录中的文件</td><td>永久（项目）</td></tr><tr><td><strong>已保存的记忆</strong></td><td>用户要求记住的零散、明确信息</td><td>通过 <code>save_memory</code> 工具</td><td>永久（全局）</td></tr><tr><td><strong>工作内存</strong></td><td>针对特定任务对代码的即时分析</td><td>通过 <code>read_file</code>、<code>glob</code>、<code>run_shell_command</code> 等工具</td><td>任务特定</td></tr></tbody></table>  </div> </article> </main> <footer data-astro-cid-sz7xmlte>
+&copy; 2025 Shouran Mu. All rights reserved.
+<div class="social-links" data-astro-cid-sz7xmlte> <a href="https://github.com/SHRMu" target="_blank" data-astro-cid-sz7xmlte> <span class="sr-only" data-astro-cid-sz7xmlte>Go to my GitHub repo</span> <svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32" astro-icon="social/github" data-astro-cid-sz7xmlte><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" data-astro-cid-sz7xmlte></path></svg> </a> </div> </footer>  </body>
